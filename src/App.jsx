@@ -33,14 +33,19 @@ function App() {
       .then(data => setTodos(data))
   }
 
+  async function clearAll() {
+    for (let i = todos.length - 1; i >= 0; i--) {
+      await fetch(`https://todo-backend-9fq7.onrender.com/todos/${i}`, {
+        method: 'DELETE'
+      })
+    }
+    setTodos([])
+  }
+
   function toggleTodo(index) {
     const updated = [...todos]
     updated[index].done = !updated[index].done
     setTodos(updated)
-  }
-
-  function clearAll() {
-    setTodos([])
   }
 
   const tasksLeft = todos.filter((t) => !t.done).length

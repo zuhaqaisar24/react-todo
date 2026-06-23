@@ -1,14 +1,36 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 
 function App() {
   const [todos, setTodos] = useState([])
   const [input, setInput] = useState('')
 
-  function addTodo() {
+  useEffect(() => {
+    fetch('https://todo-backend-9fq7.onrender.com/todos')
+      .then(res => res.json())
+      .then(data => setTodos(data))
+  }, [])
+
+  async function addTodo() {
     if (input.trim() === '') return
-    setTodos([...todos, { text: input, done: false }])
+    await fetch('https://todo-backend-9fq7.onrender.com/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: input })
+    })
     setInput('')
+    fetch('https://todo-backend-9fq7.onrender.com/todos')
+      .then(res => res.json())
+      .then(data => setTodos(data))
+  }
+
+  async function deleteTodo(index) {
+    await fetch(`https://todo-backend-9fq7.onrender.com/todos/${index}`, {
+      method: 'DELETE'
+    })
+    fetch('https://todo-backend-9fq7.onrender.com/todos')
+      .then(res => res.json())
+      .then(data => setTodos(data))
   }
 
   function toggleTodo(index) {
@@ -17,8 +39,8 @@ function App() {
     setTodos(updated)
   }
 
-  function deleteTodo(index) {
-    setTodos(todos.filter((_, i) => i !== index))
+  function clearAll() {
+    setTodos([])
   }
 
   const tasksLeft = todos.filter((t) => !t.done).length
@@ -36,6 +58,7 @@ function App() {
           placeholder="Add a new task"
         />
         <button onClick={addTodo}>Add</button>
+        <button onClick={clearAll} className="clear-btn">Clear All</button>
       </div>
 
       {todos.length > 0 && (
